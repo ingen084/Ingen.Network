@@ -1,0 +1,14 @@
+<Project>
+  <Import Project="..\version.props" />
+
+  <PropertyGroup>
+    <Product>Ingen.Network</Product>
+    <Authors>ingen084</Authors>
+    <Company>ingen084</Company>
+    <PackageTags>ingen network</PackageTags>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <IncludeSymbols>True</IncludeSymbols>
+    <IncludeSource>True</IncludeSource>
+    <VersionSuffix Condition="'$(VersionSuffix)'!='' AND '$(BuildNumber)' != ''">$(VersionSuffix)-$(BuildNumber)</VersionSuffix>
+  </PropertyGroup>
+</Project>

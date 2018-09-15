@@ -1,0 +1,7 @@
+<Project>
+  <PropertyGroup>
+    <KoreBuildChannel>release/2.0</KoreBuildChannel>
+    <VersionPrefix>0.1.0</VersionPrefix>
+    <VersionSuffix>alpha</VersionSuffix>
+  </PropertyGroup>
+</Project>

@@ -17,7 +17,7 @@ namespace Ingen.Network
 		private NetworkStream Stream { get; set; }
 
 		private byte[] ReceiveBuffer { get; } = new byte[2048];
-		private PacketSplitter Splitter { get; } = new PacketSplitter();
+		private PacketService PacketService { get; } = new PacketService();
 		private CancellationTokenSource TokenSource;
 
 		private Timer HeartbeatTimer { get; set; }
@@ -34,7 +34,6 @@ namespace Ingen.Network
 			{
 				UnReceiveTime++;
 				UnSendTime++;
-				//Console.WriteLine($"{GetHashCode()}: R:{UnReceiveTime} S:{UnSendTime}");
 
 				if (UnReceiveTime >= PING_TIMEOUT_TIME)
 				{
@@ -74,7 +73,7 @@ namespace Ingen.Network
 				while ((count = await Stream.ReadAsync(ReceiveBuffer, 0, ReceiveBuffer.Length, TokenSource.Token)) > 0)
 				{
 					UnReceiveTime = 0;
-					var result = Splitter.WriteAndSplit(ReceiveBuffer, count);
+					var result = PacketService.ParseAndSplitPacket(ReceiveBuffer, count);
 					Console.WriteLine("Splitted: " + BitConverter.ToString(result));
 					if (result == null || result.Length == 0)
 						continue;
@@ -101,15 +100,7 @@ namespace Ingen.Network
 			if (data == null)
 				buffer = new byte[4];
 			else
-			{
-				var bytes = await Task.Run(() => LZ4MessagePackSerializer.Serialize(data));
-
-				buffer = new byte[4 + bytes.Length];
-				Buffer.BlockCopy(bytes, 0, buffer, 4, bytes.Length);
-
-				var length = BitConverter.GetBytes(bytes.Length);
-				Buffer.BlockCopy(length, 0, buffer, 0, 4);
-			}
+				buffer = PacketService.MakePacket(await Task.Run(() => LZ4MessagePackSerializer.Serialize(data)));
 
 			try
 			{

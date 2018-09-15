@@ -2,13 +2,15 @@
 
 namespace Ingen.Network
 {
-	public class PacketSplitter
+	public class PacketService
 	{
+		public ICryptoService CryptoService { get; set; }
+
 		private readonly object _lockObject = new object();
 		private byte[] PendingBytes;
 		private int PacketSize;
 
-		public byte[] WriteAndSplit(byte[] bytes, int byteCount)
+		public byte[] ParseAndSplitPacket(byte[] bytes, int byteCount)
 		{
 			lock (_lockObject)
 			{
@@ -29,11 +31,25 @@ namespace Ingen.Network
 					PendingBytes = null;
 					byte[] result = new byte[PacketSize];
 					Buffer.BlockCopy(buffer, 0, result, 0, PacketSize);
+					if (CryptoService != null)
+						return CryptoService.Decrypt(result);
 					return result;
 				}
 				PendingBytes = buffer;
 				return null;
 			}
+		}
+		public byte[] MakePacket(byte[] contents)
+		{
+			var buffer = new byte[4 + contents.Length];
+			Buffer.BlockCopy(contents, 0, buffer, 4, contents.Length);
+
+			var length = BitConverter.GetBytes(contents.Length);
+			Buffer.BlockCopy(length, 0, buffer, 0, 4);
+
+			if (CryptoService != null)
+				return CryptoService.Crypt(buffer);
+			return buffer;
 		}
 	}
 }

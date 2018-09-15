@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28010.2019
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ingen.Network", "Ingen.Network\Ingen.Network.csproj", "{91CBC882-5F50-4754-BDFD-A98A34CB4053}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ingen.Network", "src\Ingen.Network\Ingen.Network.csproj", "{91CBC882-5F50-4754-BDFD-A98A34CB4053}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ingen.Network.Sandbox", "Ingen.Network.Sandbox\Ingen.Network.Sandbox.csproj", "{03ECD325-CB99-4941-872E-3C63E156E5A3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ingen.Network.Sandbox", "src\Ingen.Network.Sandbox\Ingen.Network.Sandbox.csproj", "{03ECD325-CB99-4941-872E-3C63E156E5A3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

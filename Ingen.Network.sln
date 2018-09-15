@@ -5,7 +5,12 @@ VisualStudioVersion = 15.0.28010.2019
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ingen.Network", "src\Ingen.Network\Ingen.Network.csproj", "{91CBC882-5F50-4754-BDFD-A98A34CB4053}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ingen.Network.Sandbox", "src\Ingen.Network.Sandbox\Ingen.Network.Sandbox.csproj", "{03ECD325-CB99-4941-872E-3C63E156E5A3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ingen.Network.Sandbox", "src\Ingen.Network.Sandbox\Ingen.Network.Sandbox.csproj", "{03ECD325-CB99-4941-872E-3C63E156E5A3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F189301A-0384-4865-93DE-1A87B74D6E0B}"
+	ProjectSection(SolutionItems) = preProject
+		readme.md = readme.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

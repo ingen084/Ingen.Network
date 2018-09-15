@@ -2,7 +2,7 @@
 {
 	public interface ICryptoService
 	{
-		byte[] Crypt(byte[] input);
+		byte[] Encrypt(byte[] input);
 		byte[] Decrypt(byte[] input);
 	}
 }

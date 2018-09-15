@@ -48,7 +48,7 @@ namespace Ingen.Network
 			Buffer.BlockCopy(length, 0, buffer, 0, 4);
 
 			if (CryptoService != null)
-				return CryptoService.Crypt(buffer);
+				return CryptoService.Encrypt(buffer);
 			return buffer;
 		}
 	}

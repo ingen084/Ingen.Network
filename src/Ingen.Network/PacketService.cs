@@ -26,29 +26,39 @@ namespace Ingen.Network
 				//バッファの中身をコピーする
 				Buffer.BlockCopy(bytes, PendingBytes == null ? 4 : 0, buffer, PendingBytes?.Length ?? 0, byteCount - (PendingBytes == null ? 4 : 0));
 
-				if (buffer.Length >= PacketSize)
+				Console.WriteLine("PacketSize: " + PacketSize + " Received:" + byteCount + " BufferLength:" + buffer.Length);
+
+				try
 				{
-					PendingBytes = null;
-					byte[] result = new byte[PacketSize];
-					Buffer.BlockCopy(buffer, 0, result, 0, PacketSize);
-					if (CryptoService != null)
-						return CryptoService.Decrypt(result);
-					return result;
+					if (buffer.Length >= PacketSize)
+					{
+						PendingBytes = null;
+						byte[] result = new byte[PacketSize];
+						Buffer.BlockCopy(buffer, 0, result, 0, PacketSize);
+						if (CryptoService != null)
+							return CryptoService.Decrypt(result);
+						return result;
+					}
+					PendingBytes = buffer;
 				}
-				PendingBytes = buffer;
+				catch (Exception ex)
+				{
+					;
+				}
 				return null;
 			}
 		}
 		public byte[] MakePacket(byte[] contents)
 		{
+			if (CryptoService != null)
+				contents = CryptoService.Encrypt(contents);
+
 			var buffer = new byte[4 + contents.Length];
 			Buffer.BlockCopy(contents, 0, buffer, 4, contents.Length);
 
 			var length = BitConverter.GetBytes(contents.Length);
 			Buffer.BlockCopy(length, 0, buffer, 0, 4);
 
-			if (CryptoService != null)
-				return CryptoService.Encrypt(buffer);
 			return buffer;
 		}
 	}

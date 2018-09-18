@@ -10,19 +10,28 @@ namespace Ingen.Network.Sandbox
 		{
 			using (var server = new Server<IMessageBase>(new IPEndPoint(IPAddress.Loopback, 1234)))
 			{
-				server.ClientConnected += c => Console.WriteLine("Server-ClientConnected");
+				server.ClientConnected += c =>
+				{
+					Console.WriteLine("Server-Connected");
+					c.CryptoService = new RsaCryptoService("private-key.pem");
+					c.Received += m => Console.WriteLine($"Server-Received: {(m as Message).StringMessage}");
+				};
 				server.Listen().GetAwaiter();
 				Console.WriteLine("Hello World!");
 				using (var client = new Client<IMessageBase>())
 				{
 					client.Received += m => Console.WriteLine($"Received: {(m as Message).StringMessage}");
-					client.Connected += () => Console.WriteLine("Client-Connected");
-					client.Disconnected += () => Console.WriteLine("Client-DisConnected");
+					client.Connected += () =>
+					{
+						Console.WriteLine("Client-Connected");
+						client.CryptoService = new RsaCryptoService("public-key.pem");
+					};
+					client.Disconnected += () => Console.WriteLine("Client-Disconnected");
 					client.Connect("localhost", 1234).GetAwaiter();
 
 					string text;
 					while (!string.IsNullOrEmpty(text = Console.ReadLine()))
-						server.Broadcast(new Message { StringMessage = text }).Wait();
+						client.Send(new Message { StringMessage = text }).Wait();
 				}
 			}
 		}

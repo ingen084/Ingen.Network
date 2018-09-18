@@ -20,6 +20,12 @@ namespace Ingen.Network
 		private PacketService PacketService { get; } = new PacketService();
 		private CancellationTokenSource TokenSource;
 
+		public ICryptoService CryptoService
+		{
+			get => PacketService?.CryptoService;
+			set => PacketService.CryptoService = value;
+		}
+
 		private Timer HeartbeatTimer { get; set; }
 		private int UnReceiveTime { get; set; }
 		private int UnSendTime { get; set; }
@@ -73,6 +79,7 @@ namespace Ingen.Network
 				while ((count = await Stream.ReadAsync(ReceiveBuffer, 0, ReceiveBuffer.Length, TokenSource.Token)) > 0)
 				{
 					UnReceiveTime = 0;
+					Console.WriteLine("Receive: " + BitConverter.ToString(ReceiveBuffer, 0, count));
 					var result = PacketService.ParseAndSplitPacket(ReceiveBuffer, count);
 					Console.WriteLine("Splitted: " + BitConverter.ToString(result));
 					if (result == null || result.Length == 0)

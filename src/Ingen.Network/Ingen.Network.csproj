@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="BouncyCastle.NetCore" Version="1.8.3" />
     <PackageReference Include="MessagePack" Version="1.7.3.4" />
   </ItemGroup>
 

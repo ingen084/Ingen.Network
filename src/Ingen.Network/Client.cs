@@ -70,11 +70,12 @@ namespace Ingen.Network
 			await Receive();
 		}
 
-		public async Task Receive()
+		internal async Task Receive()
 		{
-			Stream = TcpClient.GetStream();
 			try
 			{
+				Stream = TcpClient.GetStream();
+
 				var count = 0;
 				while ((count = await Stream.ReadAsync(ReceiveBuffer, 0, ReceiveBuffer.Length, TokenSource.Token)) > 0)
 				{
@@ -95,31 +96,42 @@ namespace Ingen.Network
 				Console.WriteLine("Receive Socket Exception: " + ex);
 				Disconnect();
 			}
+			catch (Exception ex)
+			{
+				Console.WriteLine("Receive General Exception: " + ex);
+				Disconnect();
+			}
 		}
 		public async Task Send(TBase data)
 		{
-			//todo ここなんとかならないかな？
-			if (Stream == null)
-				return;
-
-			byte[] buffer;
-
-			if (data == null)
-				buffer = new byte[2];
-			else
-				buffer = PacketService.MakePacket(await Task.Run(() => LZ4MessagePackSerializer.Serialize(data)));
-
 			try
 			{
+				//todo ここなんとかならないかな？
+				if (Stream == null)
+					return;
+
+				byte[] buffer;
+
+				if (data == null)
+					buffer = new byte[2];
+				else
+					buffer = PacketService.MakePacket(await Task.Run(() => LZ4MessagePackSerializer.Serialize(data)));
+
 				Console.WriteLine("Send: " + BitConverter.ToString(buffer));
 				await Stream.WriteAsync(buffer, 0, buffer.Length);
+				await Stream.FlushAsync();
+				UnSendTime = 0;
 			}
 			catch (SocketException ex)
 			{
 				Console.WriteLine("Send Socket Exception: " + ex);
 				Disconnect();
 			}
-			UnSendTime = 0;
+			catch (Exception ex)
+			{
+				Console.WriteLine("Send General Exception: " + ex);
+				Disconnect();
+			}
 		}
 
 		public void Disconnect()

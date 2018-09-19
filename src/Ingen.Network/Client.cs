@@ -36,7 +36,6 @@ namespace Ingen.Network
 
 		public Client()
 		{
-			TokenSource = new CancellationTokenSource();
 			HeartbeatTimer = new Timer(s =>
 			{
 				UnReceiveTime++;
@@ -59,6 +58,7 @@ namespace Ingen.Network
 		{
 			TcpClient = client;
 			HeartbeatTimer.Change(1000, 1000);
+			TokenSource = new CancellationTokenSource();
 		}
 		public async Task Connect(string hostname, int port)
 		{
@@ -68,6 +68,7 @@ namespace Ingen.Network
 			await TcpClient.ConnectAsync(hostname, port);
 			HeartbeatTimer.Change(1000, 1000);
 			Connected?.Invoke();
+			TokenSource = new CancellationTokenSource();
 			await Receive();
 		}
 
@@ -81,9 +82,9 @@ namespace Ingen.Network
 				while ((count = await Stream.ReadAsync(ReceiveBuffer, 0, ReceiveBuffer.Length, TokenSource.Token)) > 0)
 				{
 					UnReceiveTime = 0;
-					Console.WriteLine("Receive: " + BitConverter.ToString(ReceiveBuffer, 0, count));
+					//Console.WriteLine("Receive: " + BitConverter.ToString(ReceiveBuffer, 0, count));
 					var result = PacketService.ParseAndSplitPacket(ReceiveBuffer, count);
-					Console.WriteLine("Splitted: " + BitConverter.ToString(result));
+					//Console.WriteLine("Splitted: " + BitConverter.ToString(result));
 					if (result == null || result.Length == 0)
 						continue;
 					Received?.Invoke(LZ4MessagePackSerializer.Deserialize<TBase>(result));
@@ -104,8 +105,12 @@ namespace Ingen.Network
 			try
 			{
 				//todo ここなんとかならないかな？
-				if (Stream == null)
+				if (!Stream.CanWrite)
+				{
+					Console.WriteLine("書き込み不可");
+					Disconnect();
 					return;
+				}
 
 				byte[] buffer;
 
@@ -114,7 +119,7 @@ namespace Ingen.Network
 				else
 					buffer = PacketService.MakePacket(await Task.Run(() => LZ4MessagePackSerializer.Serialize(data)));
 
-				Console.WriteLine("Send: " + BitConverter.ToString(buffer));
+				//Console.WriteLine("Send: " + BitConverter.ToString(buffer));
 				await Stream.WriteAsync(buffer, 0, buffer.Length);
 				await Stream.FlushAsync();
 				UnSendTime = 0;

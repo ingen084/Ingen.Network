@@ -29,13 +29,16 @@ namespace Ingen.Network
 				var client = new Client<TBase>(await Listener.AcceptTcpClientAsync());
 				client.Disconnected += () =>
 				{
+					Console.WriteLine("Client Disconnected - " + client.GetHashCode());
 					client?.Dispose();
-					Clients.Remove(client);
+					if (Clients.Contains(client))
+						Clients.Remove(client);
 					client = null;
 				};
 
 				Clients.Add(client);
 				ClientConnected?.Invoke(client);
+				Console.WriteLine("Client Connected - " + client.GetHashCode());
 				client.Receive().GetAwaiter();
 			}
 		}

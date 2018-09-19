@@ -89,10 +89,7 @@ namespace Ingen.Network
 					Received?.Invoke(LZ4MessagePackSerializer.Deserialize<TBase>(result));
 				}
 			}
-			catch (TaskCanceledException)
-			{
-			}
-			catch (Exception ex) when (ex is IOException || ex is SocketException)
+			catch (Exception ex) when (ex is TaskCanceledException || ex is IOException || ex is SocketException)
 			{
 				Disconnect();
 			}

@@ -76,6 +76,8 @@ namespace Ingen.Network
 			{
 				Stream = TcpClient.GetStream();
 				HeartbeatTimer.Change(1000, 1000);
+				UnReceiveTime = 0;
+				UnSendTime = 0;
 
 				var count = 0;
 				while ((count = await Stream.ReadAsync(ReceiveBuffer, 0, ReceiveBuffer.Length, TokenSource.Token)) > 0)
@@ -98,13 +100,17 @@ namespace Ingen.Network
 				Console.WriteLine("Receive General Exception: " + ex);
 				Disconnect();
 			}
+			finally
+			{
+				HeartbeatTimer.Change(Timeout.Infinite, Timeout.Infinite);
+			}
 		}
 		public async Task Send(TBase data)
 		{
 			try
 			{
 				//todo ここなんとかならないかな？
-				if (!Stream.CanWrite)
+				if (!(Stream?.CanWrite ?? false))
 				{
 					Console.WriteLine("書き込み不可");
 					Disconnect();
@@ -118,9 +124,7 @@ namespace Ingen.Network
 				else
 					buffer = PacketService.MakePacket(await Task.Run(() => LZ4MessagePackSerializer.Serialize(data)));
 
-				//Console.WriteLine("Send: " + BitConverter.ToString(buffer));
 				await Stream.WriteAsync(buffer, 0, buffer.Length);
-				await Stream.FlushAsync();
 				UnSendTime = 0;
 			}
 			catch (Exception ex) when (ex is IOException || ex is SocketException)
@@ -137,7 +141,6 @@ namespace Ingen.Network
 		public void Disconnect()
 		{
 			TokenSource.Cancel();
-			HeartbeatTimer.Change(Timeout.Infinite, Timeout.Infinite);
 			TcpClient.Close();
 			Disconnected?.Invoke();
 		}

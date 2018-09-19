@@ -1,5 +1,6 @@
 ﻿using MessagePack;
 using System;
+using System.IO;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -91,9 +92,8 @@ namespace Ingen.Network
 			catch (TaskCanceledException)
 			{
 			}
-			catch (SocketException ex)
+			catch (Exception ex) when (ex is IOException || ex is SocketException)
 			{
-				Console.WriteLine("Receive Socket Exception: " + ex);
 				Disconnect();
 			}
 			catch (Exception ex)
@@ -122,9 +122,8 @@ namespace Ingen.Network
 				await Stream.FlushAsync();
 				UnSendTime = 0;
 			}
-			catch (SocketException ex)
+			catch (Exception ex) when (ex is IOException || ex is SocketException)
 			{
-				Console.WriteLine("Send Socket Exception: " + ex);
 				Disconnect();
 			}
 			catch (Exception ex)

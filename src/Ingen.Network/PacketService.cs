@@ -26,7 +26,7 @@ namespace Ingen.Network
 				//バッファの中身をコピーする
 				Buffer.BlockCopy(bytes, PendingBytes == null ? 2 : 0, buffer, PendingBytes?.Length ?? 0, byteCount - (PendingBytes == null ? 2 : 0));
 
-				Console.WriteLine("PacketSize: " + PacketSize + " Received:" + byteCount + " BufferLength:" + buffer.Length);
+				//Console.WriteLine("PacketSize: " + PacketSize + " Received:" + byteCount + " BufferLength:" + buffer.Length);
 
 				if (buffer.Length >= PacketSize)
 				{

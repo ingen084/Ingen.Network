@@ -6,31 +6,31 @@ namespace Ingen.Network
 {
 	public class AesCryptoService : ICryptoService, IDisposable
 	{
-		public byte[] IV => CryptoServiceProvider?.IV;
-		public byte[] Key => CryptoServiceProvider?.Key;
+		public byte[] IV => CryptoService?.IV;
+		public byte[] Key => CryptoService?.Key;
 
-		private AesCryptoServiceProvider CryptoServiceProvider { get; }
+		private AesManaged CryptoService { get; }
 		private ICryptoTransform Encryptor { get; }
 		private ICryptoTransform Decryptor { get; }
 
 		public AesCryptoService()
 		{
-			CryptoServiceProvider = new AesCryptoServiceProvider
+			CryptoService = new AesManaged
 			{
 				BlockSize = 128,
 				KeySize = 256,
 				Mode = CipherMode.CBC,
 				Padding = PaddingMode.PKCS7,
 			};
-			CryptoServiceProvider.GenerateIV();
-			CryptoServiceProvider.GenerateKey();
+			CryptoService.GenerateIV();
+			CryptoService.GenerateKey();
 
-			Encryptor = CryptoServiceProvider.CreateEncryptor();
-			Decryptor = CryptoServiceProvider.CreateDecryptor();
+			Encryptor = CryptoService.CreateEncryptor();
+			Decryptor = CryptoService.CreateDecryptor();
 		}
 		public AesCryptoService(byte[] initalVector, byte[] key)
 		{
-			CryptoServiceProvider = new AesCryptoServiceProvider
+			CryptoService = new AesManaged
 			{
 				BlockSize = 128,
 				KeySize = 256,
@@ -39,23 +39,37 @@ namespace Ingen.Network
 				IV = initalVector,
 				Key = key
 			};
-			Encryptor = CryptoServiceProvider.CreateEncryptor();
-			Decryptor = CryptoServiceProvider.CreateDecryptor();
+			Encryptor = CryptoService.CreateEncryptor();
+			Decryptor = CryptoService.CreateDecryptor();
 		}
 
-		//memo ブロックのサイズ超えたら問題が起きるのでは…？
-
 		public byte[] Encrypt(byte[] input)
-			=> Encryptor.TransformFinalBlock(input, 0, input.Length);
+		{
+			using (var outputStream = new MemoryStream())
+			using (var cStream = new CryptoStream(outputStream, Encryptor, CryptoStreamMode.Write))
+			{
+				cStream.Write(input, 0, input.Length);
+				cStream.FlushFinalBlock();
+				return outputStream.ToArray();
+			}
+		}
 
 		public byte[] Decrypt(byte[] input)
-			=> Decryptor.TransformFinalBlock(input, 0, input.Length);
+		{
+			using (var outputStream = new MemoryStream())
+			using (var cStream = new CryptoStream(outputStream, Decryptor, CryptoStreamMode.Write))
+			{
+				cStream.Write(input, 0, input.Length);
+				cStream.FlushFinalBlock();
+				return outputStream.ToArray();
+			}
+		}
 
 		public void Dispose()
 		{
 			Decryptor.Dispose();
 			Encryptor.Dispose();
-			CryptoServiceProvider.Dispose();
+			CryptoService.Dispose();
 		}
 	}
 }

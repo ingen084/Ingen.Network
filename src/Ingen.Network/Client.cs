@@ -105,7 +105,7 @@ namespace Ingen.Network
 			byte[] buffer;
 
 			if (data == null)
-				buffer = new byte[4];
+				buffer = new byte[2];
 			else
 				buffer = PacketService.MakePacket(await Task.Run(() => LZ4MessagePackSerializer.Serialize(data)));
 

@@ -57,7 +57,6 @@ namespace Ingen.Network
 		public Client(TcpClient client) : this()
 		{
 			TcpClient = client;
-			HeartbeatTimer.Change(1000, 1000);
 			TokenSource = new CancellationTokenSource();
 		}
 		public async Task Connect(string hostname, int port)
@@ -66,7 +65,6 @@ namespace Ingen.Network
 				TcpClient.Dispose();
 			TcpClient = new TcpClient();
 			await TcpClient.ConnectAsync(hostname, port);
-			HeartbeatTimer.Change(1000, 1000);
 			Connected?.Invoke();
 			TokenSource = new CancellationTokenSource();
 			await Receive();
@@ -77,6 +75,7 @@ namespace Ingen.Network
 			try
 			{
 				Stream = TcpClient.GetStream();
+				HeartbeatTimer.Change(1000, 1000);
 
 				var count = 0;
 				while ((count = await Stream.ReadAsync(ReceiveBuffer, 0, ReceiveBuffer.Length, TokenSource.Token)) > 0)

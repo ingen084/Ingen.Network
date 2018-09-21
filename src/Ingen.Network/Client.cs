@@ -49,7 +49,7 @@ namespace Ingen.Network
 				}
 				if (UnSendTime >= PING_SEND_TIME)
 				{
-					Send(default(TBase)).Wait();
+					Send(default(TBase), true).Wait();
 					return;
 				}
 			}, null, Timeout.Infinite, Timeout.Infinite);
@@ -106,7 +106,7 @@ namespace Ingen.Network
 				HeartbeatTimer.Change(Timeout.Infinite, Timeout.Infinite);
 			}
 		}
-		public async Task Send(TBase data)
+		public async Task Send(TBase data, bool isEmpty = false)
 		{
 			try
 			{
@@ -120,7 +120,7 @@ namespace Ingen.Network
 
 				byte[] buffer;
 
-				if (data == null)
+				if (isEmpty)
 					buffer = new byte[2];
 				else
 					buffer = PacketService.MakePacket(await Task.Run(() => LZ4MessagePackSerializer.Serialize(data)));

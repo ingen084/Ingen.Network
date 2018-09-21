@@ -74,13 +74,14 @@ namespace Ingen.Network
 		{
 			try
 			{
+				TcpClient.NoDelay = true;
 				Stream = TcpClient.GetStream();
 				HeartbeatTimer.Change(1000, 1000);
 				UnReceiveTime = 0;
 				UnSendTime = 0;
 
 				var count = 0;
-				while ((count = await Stream.ReadAsync(ReceiveBuffer, 0, ReceiveBuffer.Length, TokenSource.Token)) > 0)
+				while (Stream.CanRead && (count = await Stream.ReadAsync(ReceiveBuffer, 0, ReceiveBuffer.Length, TokenSource.Token)) > 0)
 				{
 					UnReceiveTime = 0;
 					//Console.WriteLine("Receive: " + BitConverter.ToString(ReceiveBuffer, 0, count));

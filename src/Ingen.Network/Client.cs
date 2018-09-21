@@ -140,6 +140,7 @@ namespace Ingen.Network
 
 		public void Disconnect()
 		{
+			HeartbeatTimer.Change(Timeout.Infinite, Timeout.Infinite);
 			TokenSource.Cancel();
 			TcpClient.Close();
 			Disconnected?.Invoke();
